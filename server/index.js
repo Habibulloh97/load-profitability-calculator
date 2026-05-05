@@ -3,6 +3,7 @@ import cors from "cors"
 import cookieParser from "cookie-parser"
 import dotenv from "dotenv"
 import mongoose from "mongoose"
+import router from "./routes/authRoute.js"
 
 dotenv.config()
 
@@ -15,6 +16,7 @@ app.use(cors({
 
 app.use(express.json())
 app.use(cookieParser())
+app.use("/api/auth",router)
 
 
 app.get("/health", (req,res)=>{
