@@ -1,34 +1,39 @@
-import express from "express"
-import cors from "cors"
-import cookieParser from "cookie-parser"
-import dotenv from "dotenv"
-import mongoose from "mongoose"
-import router from "./routes/authRoute.js"
+import express from "express";
+import cors from "cors";
+import cookieParser from "cookie-parser";
+import dotenv from "dotenv";
+import mongoose from "mongoose";
+import authRouter from "./routes/authRoute.js";
+import truckRouter from "./routes/truckRoute.js";
+import { requireAuth } from "./middlewares/requireAuth.js";
 
-dotenv.config()
+dotenv.config();
 
-const app = express()
+const app = express();
 
-app.use(cors({
-    origin : process.env.CLIENT_URL,
-    credentials: true
-}))
+app.use(
+  cors({
+    origin: process.env.CLIENT_URL,
+    credentials: true,
+  }),
+);
 
-app.use(express.json())
-app.use(cookieParser())
-app.use("/api/auth",router)
+app.use(express.json());
+app.use(cookieParser());
+app.use("/api/auth", authRouter);
+app.use("/api/trucks", requireAuth, truckRouter);
 
+app.get("/health", (req, res) => {
+  res.json({ ok: true, ts: new Date().toDateString() });
+});
 
-app.get("/health", (req,res)=>{
-    res.json({ok:true, ts: new Date().toDateString()})
-})
+const PORT = process.env.PORT || "5000";
 
-const PORT =process.env.PORT ||"5000"
+mongoose
+  .connect(process.env.MONGO_URI)
+  .then(() => console.log("Mongo Connected"))
+  .catch((err) => console.error("Mongo Connection Failed:", err.message));
 
-mongoose.connect(process.env.MONGO_URI)
-    .then(()=>console.log("Mongo Connected"))
-    .catch((err)=>console.error("Mongo Connection Failed:", err.message))
-
-app.listen(PORT,()=>{
-    console.log(`Server is running on http://localhost:${PORT}`)
-})
+app.listen(PORT, () => {
+  console.log(`Server is running on http://localhost:${PORT}`);
+});

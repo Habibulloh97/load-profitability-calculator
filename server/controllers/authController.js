@@ -33,7 +33,7 @@ export async function login(req, res) {
       secure: process.env.NODE_ENV === "production",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
-    res.status(200).json({ id: user._id, email: user.email });
+    res.status(200).json({ id: user.id, email: user.email });
   } catch (err) {
     if (err.message === "Invalid credentials")
       return res.status(401).json({ error: "Invalid credentials" });
