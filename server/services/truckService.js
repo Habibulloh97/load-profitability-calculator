@@ -14,7 +14,7 @@ export async function getTruck(id, accountId) {
 
 export async function updateTruck(id, accountId, updates) {
   return await Truck.findOneAndUpdate({ _id: id, accountId }, updates, {
-    new: true,
+    returnDocument: "after",
     runValidators: true,
   });
 }

@@ -5,6 +5,7 @@ import dotenv from "dotenv";
 import mongoose from "mongoose";
 import authRouter from "./routes/authRoute.js";
 import truckRouter from "./routes/truckRoute.js";
+import driverRouter from "./routes/driverRoute.js";
 import { requireAuth } from "./middlewares/requireAuth.js";
 
 dotenv.config();
@@ -22,6 +23,7 @@ app.use(express.json());
 app.use(cookieParser());
 app.use("/api/auth", authRouter);
 app.use("/api/trucks", requireAuth, truckRouter);
+app.use("/api/drivers", requireAuth, driverRouter);
 
 app.get("/health", (req, res) => {
   res.json({ ok: true, ts: new Date().toDateString() });
