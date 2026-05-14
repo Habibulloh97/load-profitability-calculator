@@ -3,7 +3,9 @@ import SignupPage from "./pages/SignupPage.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
 import DashboardPage from "./pages/DashboardPage.jsx";
 import ProtectedRoute from "./components/ui/ProtectedRoute.jsx";
+import SettingsPage from "./pages/SettingsPage.jsx";
 import { Button } from "./components/ui/button";
+import TrucksPage from "./pages/TrucksPage.jsx";
 function App() {
   return (
     <Routes>
@@ -17,6 +19,15 @@ function App() {
           </ProtectedRoute>
         }
       />
+      <Route
+        path="/settings"
+        element={
+          <ProtectedRoute>
+            <SettingsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route path="/trucks" element={<TrucksPage />} />
     </Routes>
   );
 }
