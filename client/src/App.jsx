@@ -6,6 +6,7 @@ import ProtectedRoute from "./components/ui/ProtectedRoute.jsx";
 import SettingsPage from "./pages/SettingsPage.jsx";
 import { Button } from "./components/ui/button";
 import TrucksPage from "./pages/TrucksPage.jsx";
+import DriversPage from "./pages/DriversPage.jsx";
 function App() {
   return (
     <Routes>
@@ -27,7 +28,15 @@ function App() {
           </ProtectedRoute>
         }
       />
-      <Route path="/trucks" element={<TrucksPage />} />
+      <Route
+        path="/trucks"
+        element={
+          <ProtectedRoute>
+            <TrucksPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route path="/drivers" element={<DriversPage />} />
     </Routes>
   );
 }

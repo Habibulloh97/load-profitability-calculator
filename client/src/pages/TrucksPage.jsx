@@ -31,7 +31,6 @@ export default function TrucksPage() {
   async function fetchTrucks() {
     try {
       const res = await api.get("/api/trucks");
-      console.log(res.data);
       setData(res.data);
     } catch (err) {
       setListError(err.response?.data?.error || "Something went wrong");
