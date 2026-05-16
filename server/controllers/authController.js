@@ -1,4 +1,9 @@
-import { registerUser, logInUser } from "../services/authService.js";
+import {
+  registerUser,
+  logInUser,
+  updateMe,
+  deleteUser,
+} from "../services/authService.js";
 
 export async function register(req, res) {
   try {
@@ -43,6 +48,32 @@ export async function login(req, res) {
 }
 
 export async function getMe(req, res) {
-  const { id, email } = req.user;
-  res.status(200).json({ id, email });
+  const { id, email, dispatchRates, maintenanceRates, companyDriverPay } =
+    req.user;
+  res.status(200).json(req.user);
+}
+
+export async function update(req, res) {
+  try {
+    const userId = req.user._id;
+    const { passwordHash, ...safeUpdates } = req.body;
+    if (Object.keys(safeUpdates).length === 0) {
+      return res.status(400).json({ error: "Update Field Can't be Empty" });
+    }
+    const updated = await updateMe(userId, safeUpdates);
+    return res.status(200).json(updated);
+  } catch (err) {
+    return res.status(500).json({ error: "Something went Wrong" });
+  }
+}
+
+export async function remove(req, res) {
+  try {
+    const id = req.user._id;
+    const removed = await deleteUser(id);
+    res.clearCookie("token");
+    return res.status(204).end();
+  } catch (err) {
+    return res.status(500).json({ error: "Server Error" });
+  }
 }

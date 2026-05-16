@@ -36,7 +36,14 @@ function App() {
           </ProtectedRoute>
         }
       />
-      <Route path="/drivers" element={<DriversPage />} />
+      <Route
+        path="/drivers"
+        element={
+          <ProtectedRoute>
+            <DriversPage />
+          </ProtectedRoute>
+        }
+      />
     </Routes>
   );
 }

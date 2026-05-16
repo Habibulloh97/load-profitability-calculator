@@ -22,3 +22,15 @@ export async function logInUser(email, password) {
   });
   return { token: signedToken, user };
 }
+
+export async function updateMe(userId, updates) {
+  return await User.findOneAndUpdate(
+    { _id: userId },
+    { $set: updates },
+    { returnDocument: "after", runValidators: true },
+  );
+}
+
+export async function deleteUser(userId) {
+  return await User.findOneAndDelete({ _id: userId });
+}
