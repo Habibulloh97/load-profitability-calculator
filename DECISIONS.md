@@ -109,6 +109,12 @@ Each entry follows: what I picked, what I considered, why.
 
 ---
 
+## Dialog: single instance for create and editDialog: single instance for create and edit
+
+**Picked:** One Dialog controlled by selectedTruck state — null means create mode, populated means edit mode.
+**Considered:** Two separate Dialogs, separate page routes (/trucks/new, /trucks/:id/edit), inline cell editing.
+**Why:** Single Dialog means one formData and one formError — no risk of two state trees drifting out of sync. Separate routes lose list context and add unnecessary navigation for a two-field form. Inline editing complicates validation. One Dialog, one truth.
+
 ## Excluded from v1
 
 These features were considered and explicitly cut:

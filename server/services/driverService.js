@@ -5,7 +5,7 @@ export async function createDriver({ name, type, accountId, truckId }) {
 }
 
 export async function listDrivers(accountId) {
-  return await Driver.find({ accountId });
+  return await Driver.find({ accountId }).populate("truckId");
 }
 
 export async function getDriver(id, accountId) {
@@ -13,10 +13,14 @@ export async function getDriver(id, accountId) {
 }
 
 export async function updateDriver(id, accountId, updates) {
-  return await Driver.findOneAndUpdate({ _id: id, accountId }, updates, {
-    returnDocument: "after",
-    runValidators: true,
-  });
+  return await Driver.findOneAndUpdate(
+    { _id: id, accountId },
+    { $set: updates },
+    {
+      returnDocument: "after",
+      runValidators: true,
+    },
+  );
 }
 
 export async function deleteDriver(id, accountId) {
