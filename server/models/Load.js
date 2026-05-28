@@ -52,7 +52,7 @@ const LoadSchema = new mongoose.Schema(
       tolls: { type: Number },
       totalCost: { type: Number },
       netProfit: { type: Number },
-      profitPerLoadedMile: { type: Number },
+      ratePerMile: { type: Number },
       profitPercent: { type: Number },
     },
   },

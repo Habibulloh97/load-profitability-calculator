@@ -1,0 +1,45 @@
+export default function claculateBreakDown(
+  rate,
+  totalMiles,
+  dispatchRates,
+  companyDriverPay,
+  driverType,
+  mpg,
+  averageFuel,
+  maintenanceRate,
+  tolls = 0,
+) {
+  if (totalMiles <= 0) {
+    throw new Error("Total Miles must be greater than 0");
+  }
+  const ratePerMile = rate / totalMiles;
+  const fuel = (totalMiles / mpg) * averageFuel;
+  let maintenance = 0;
+  let driverPay = 0;
+  let dispatchFee = 0;
+  if (driverType === "ownerOp") {
+    dispatchFee = rate * dispatchRates.ownerOp;
+  } else if (driverType === "lease") {
+    dispatchFee = rate * dispatchRates.lease;
+    maintenance = totalMiles * maintenanceRate;
+  } else if (driverType === "company") {
+    driverPay =
+      companyDriverPay.payType === "cpm"
+        ? totalMiles * companyDriverPay.cpm
+        : rate * companyDriverPay.percentage;
+  }
+  const totalCost = fuel + maintenance + driverPay + dispatchFee + tolls;
+  const netProfit = rate - totalCost;
+  const profitPercent = netProfit / (rate / 100);
+  return {
+    fuel,
+    maintenance,
+    driverPay,
+    dispatchFee,
+    tolls,
+    totalCost,
+    netProfit,
+    ratePerMile,
+    profitPercent,
+  };
+}

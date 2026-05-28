@@ -133,6 +133,12 @@ Each entry follows: what I picked, what I considered, why.
 **Considered:** Updating password through the general `/me` PATCH.
 **Why:** Password change needs current-password verification via bcrypt before writing — different validation path than profile/rate updates. Routing it through `/me` would mix concerns and risk accidental hash overwrites.
 
+## Calc engine: driver-type cost model
+
+**Picked:** Single pure function, costs assigned per driver type (ownerOp/lease/company-cpm/company-percentage), summed identically.
+**Considered:** Separate calculation block per driver type.
+**Why:** Each type has a genuinely different cost structure (ownerOp pays dispatch but self-insures maintenance; lease pays per-mile maintenance to the leasing co; company drivers paid cpm or % with no dispatch fee). Unified sum with zeroed-out non-applicable costs avoids duplication and keeps one profit formula.
+
 ## Excluded from v1
 
 These features were considered and explicitly cut:
