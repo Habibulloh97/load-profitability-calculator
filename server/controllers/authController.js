@@ -3,6 +3,7 @@ import {
   logInUser,
   updateMe,
   deleteUser,
+  changePassword,
 } from "../services/authService.js";
 
 export async function register(req, res) {
@@ -67,13 +68,39 @@ export async function update(req, res) {
   }
 }
 
+export async function updatePassword(req, res) {
+  try {
+    const userId = req.user._id;
+    const { currentPassword, newPassword } = req.body;
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ error: "Both fields are required" });
+    }
+    if (newPassword.length < 6) {
+      return res
+        .status(400)
+        .json({ error: "Password has to be at least 6 characters long" });
+    }
+    const updated = await changePassword(userId, currentPassword, newPassword);
+    return res.status(204).end();
+  } catch (err) {
+    if (err.message === "Current password is incorrect") {
+      return res.status(401).json({ error: err.message });
+    }
+    return res.status(500).json({ error: "Something went wrong" });
+  }
+}
+
 export async function remove(req, res) {
   try {
     const id = req.user._id;
-    const removed = await deleteUser(id);
+    const password = req.body.password;
+    const removed = await deleteUser(id, password);
     res.clearCookie("token");
     return res.status(204).end();
   } catch (err) {
+    if (err.message === "Password is incorrect") {
+      return res.status(401).json({ error: "Incorrect password" });
+    }
     return res.status(500).json({ error: "Server Error" });
   }
 }

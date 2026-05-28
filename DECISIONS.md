@@ -115,6 +115,24 @@ Each entry follows: what I picked, what I considered, why.
 **Considered:** Two separate Dialogs, separate page routes (/trucks/new, /trucks/:id/edit), inline cell editing.
 **Why:** Single Dialog means one formData and one formError — no risk of two state trees drifting out of sync. Separate routes lose list context and add unnecessary navigation for a two-field form. Inline editing complicates validation. One Dialog, one truth.
 
+## Settings: URL search params for active tab
+
+**Picked:** Store the active settings tab in the URL via `useSearchParams` (`?tab=rates`), Tabs in controlled mode.
+**Considered:** Uncontrolled Tabs with `defaultValue`, or persisting active tab in localStorage.
+**Why:** Survives refresh, makes tabs linkable/shareable, and works with browser back/forward. localStorage survives refresh too but doesn't reflect state in the URL.
+
+## Settings: Separate edit states per card
+
+**Picked:** Independent `editProfile` and `editRates` booleans, each card owns its own edit/save flow.
+**Considered:** One shared `isEditing` state reset on tab change.
+**Why:** Shared state couples unrelated cards — entering edit on one tab leaked into another. Separate states scale cleaner with no reset side-effects, even though both cards live in one page.
+
+## Auth: Password change as dedicated endpoint
+
+**Picked:** `PATCH /api/auth/me/password` separate from `PATCH /api/auth/me`, which strips `passwordHash` entirely.
+**Considered:** Updating password through the general `/me` PATCH.
+**Why:** Password change needs current-password verification via bcrypt before writing — different validation path than profile/rate updates. Routing it through `/me` would mix concerns and risk accidental hash overwrites.
+
 ## Excluded from v1
 
 These features were considered and explicitly cut:

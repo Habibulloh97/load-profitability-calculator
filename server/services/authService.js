@@ -31,6 +31,32 @@ export async function updateMe(userId, updates) {
   );
 }
 
-export async function deleteUser(userId) {
+export async function changePassword(userId, currentPassword, newPassword) {
+  const user = await User.findOne({ _id: userId });
+  const saltRounds = 10;
+  if (!user) {
+    throw new Error("Unauthorized");
+  }
+  const isMatch = await bcrypt.compare(currentPassword, user.passwordHash);
+  if (!isMatch) {
+    throw new Error("Current password is incorrect");
+  }
+  const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
+  return await User.findOneAndUpdate(
+    { _id: userId },
+    { $set: { passwordHash: hashedPassword } },
+    { returnDocument: "after", runValidators: true },
+  );
+}
+
+export async function deleteUser(userId, password) {
+  const user = await User.findOne({ _id: userId });
+  if (!user) {
+    throw new Error("Unathorized");
+  }
+  const isMatch = await bcrypt.compare(password, user.passwordHash);
+  if (!isMatch) {
+    throw new Error("Password is incorrect");
+  }
   return await User.findOneAndDelete({ _id: userId });
 }
