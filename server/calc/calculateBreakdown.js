@@ -1,6 +1,7 @@
-export default function claculateBreakDown(
+export default function claculateBreakDown({
   rate,
-  totalMiles,
+  loadedMiles,
+  deadheadMiles = 0,
   dispatchRates,
   companyDriverPay,
   driverType,
@@ -8,10 +9,11 @@ export default function claculateBreakDown(
   averageFuel,
   maintenanceRate,
   tolls = 0,
-) {
-  if (totalMiles <= 0) {
-    throw new Error("Total Miles must be greater than 0");
+}) {
+  if (loadedMiles <= 0) {
+    throw new Error("Loaded miles must be greater than 0");
   }
+  const totalMiles = deadheadMiles + loadedMiles;
   const ratePerMile = rate / totalMiles;
   const fuel = (totalMiles / mpg) * averageFuel;
   let maintenance = 0;
@@ -41,5 +43,8 @@ export default function claculateBreakDown(
     netProfit,
     ratePerMile,
     profitPercent,
+    deadheadMiles,
+    loadedMiles,
+    totalMiles,
   };
 }

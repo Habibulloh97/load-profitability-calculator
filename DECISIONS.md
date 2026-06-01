@@ -139,6 +139,12 @@ Each entry follows: what I picked, what I considered, why.
 **Considered:** Separate calculation block per driver type.
 **Why:** Each type has a genuinely different cost structure (ownerOp pays dispatch but self-insures maintenance; lease pays per-mile maintenance to the leasing co; company drivers paid cpm or % with no dispatch fee). Unified sum with zeroed-out non-applicable costs avoids duplication and keeps one profit formula.
 
+## Fuel price: lazy cache with Tuesday-anchored staleness
+
+**Picked:** Single global Fuel doc, refetched lazily when the cached fetchedAt predates the most recent Tuesday.
+**Considered:** Per-user storage, fixed 7-day-elapsed expiry, cron job.
+**Why:** Diesel price is national/global, so one doc — not per-user duplication. A "7 days since fetch" rule drifts with whatever day you first fetch; anchoring to Tuesday (EIA publishes Monday, +1 day buffer) keeps refreshes aligned to the publish cadence regardless of launch day. Lazy refresh avoids cron infra for a value read on-demand anyway.
+
 ## Excluded from v1
 
 These features were considered and explicitly cut:
