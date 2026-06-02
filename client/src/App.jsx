@@ -7,6 +7,7 @@ import SettingsPage from "./pages/SettingsPage.jsx";
 import { Button } from "./components/ui/button";
 import TrucksPage from "./pages/TrucksPage.jsx";
 import DriversPage from "./pages/DriversPage.jsx";
+import NewLoadPage from "./pages/NewLoadPage.jsx";
 function App() {
   return (
     <Routes>
@@ -49,6 +50,14 @@ function App() {
         element={
           <ProtectedRoute>
             <SettingsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/load"
+        element={
+          <ProtectedRoute>
+            <NewLoadPage />
           </ProtectedRoute>
         }
       />

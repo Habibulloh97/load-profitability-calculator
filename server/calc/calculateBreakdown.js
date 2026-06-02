@@ -13,6 +13,7 @@ export default function claculateBreakDown({
   if (loadedMiles <= 0) {
     throw new Error("Loaded miles must be greater than 0");
   }
+  const round2 = (n) => Math.round(n * 100) / 100;
   const totalMiles = deadheadMiles + loadedMiles;
   const ratePerMile = rate / totalMiles;
   const fuel = (totalMiles / mpg) * averageFuel;
@@ -34,17 +35,17 @@ export default function claculateBreakDown({
   const netProfit = rate - totalCost;
   const profitPercent = netProfit / (rate / 100);
   return {
-    fuel,
-    maintenance,
-    driverPay,
-    dispatchFee,
-    tolls,
-    totalCost,
-    netProfit,
-    ratePerMile,
-    profitPercent,
-    deadheadMiles,
+    fuel: round2(fuel),
+    maintenance: round2(maintenance),
+    driverPay: round2(driverPay),
+    dispatchFee: round2(dispatchFee),
+    tolls: round2(tolls),
+    totalCost: round2(totalCost),
+    netProfit: round2(netProfit),
+    ratePerMile: round2(ratePerMile),
+    profitPercent: round2(profitPercent),
     loadedMiles,
+    deadheadMiles,
     totalMiles,
   };
 }
