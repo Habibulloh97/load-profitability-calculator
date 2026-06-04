@@ -34,6 +34,12 @@ const LoadSchema = new mongoose.Schema(
     //     message: "A load must have at least one pickup and delivery address",
     //   },
     // },
+    bolNumber: {
+      type: String,
+      required: function () {
+        return this.status === "accepted";
+      },
+    },
     loadedMiles: { type: Number, required: true },
     deadheadMiles: { type: Number, default: 0 },
     rate: { type: Number, required: true },
@@ -41,7 +47,7 @@ const LoadSchema = new mongoose.Schema(
     tollsEstimate: { type: Number, default: 0 },
     status: {
       type: String,
-      enum: ["draft", "accepted", "sent"],
+      enum: ["draft", "accepted"],
       default: "draft",
     },
     breakdown: {

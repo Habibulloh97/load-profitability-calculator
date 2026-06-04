@@ -40,3 +40,15 @@ export async function createLoad(
     breakdown,
   });
 }
+
+export async function loadList(accountId) {
+  return await Load.find({ accountId });
+}
+
+export async function getLoad(id, accountId) {
+  return await Load.findOne({ _id: id, accountId });
+}
+
+export async function deleteLoad(id, accountId) {
+  return await Load.findOneAndDelete({ _id: id, accountId });
+}

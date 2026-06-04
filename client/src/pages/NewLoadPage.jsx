@@ -217,7 +217,6 @@ export default function NewLoadPage() {
               </span>
             </div>
           </div>
-
           <div className="flex justify-between">
             <span className="text-muted-foreground">
               {formData.driverType === "company"

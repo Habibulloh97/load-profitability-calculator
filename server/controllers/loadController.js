@@ -1,6 +1,12 @@
-import { createLoad } from "../services/loadService.js";
+import {
+  createLoad,
+  loadList,
+  getLoad,
+  deleteLoad,
+} from "../services/loadService.js";
 
 import User from "../models/User.js";
+import { listDrivers } from "../services/driverService.js";
 
 export async function create(req, res) {
   try {
@@ -30,5 +36,44 @@ export async function create(req, res) {
       return res.status(400).json({ error: err.message });
     }
     return res.status(500).json({ error: "Server Error" });
+  }
+}
+
+export async function list(req, res) {
+  try {
+    const loads = await loadList(req.user.id);
+    return res.status(200).json(loads);
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ error: "Server Error" });
+  }
+}
+
+export async function get(req, res) {
+  try {
+    const id = req.params.id;
+    const accountId = req.user.id;
+    const load = await getLoad(id, accountId);
+    if (!load) return res.status(404).json({ error: "Not found!" });
+    return res.status(200).json(load);
+  } catch (err) {
+    return res.status(500).json({ error: "Server error" });
+  }
+}
+
+export async function remove(req, res) {
+  try {
+    const id = req.params.id;
+    const accountId = req.user.id;
+    const removed = await deleteLoad(id, accountId);
+    if (!removed) {
+      return res.status(404).json({ error: "Not found" });
+    }
+    return res.status(204).end();
+  } catch (err) {
+    if (err.name === "CastError") {
+      return res.status(400).json({ error: "Invalid id format" });
+    }
+    return res.status(500).json({ error: "Server error" });
   }
 }

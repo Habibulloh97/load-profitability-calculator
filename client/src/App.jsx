@@ -8,6 +8,8 @@ import { Button } from "./components/ui/button";
 import TrucksPage from "./pages/TrucksPage.jsx";
 import DriversPage from "./pages/DriversPage.jsx";
 import NewLoadPage from "./pages/NewLoadPage.jsx";
+import LoadListPage from "./pages/LoadListPage.jsx";
+import LoadDetailPage from "./pages/LoadDetailPage.jsx";
 function App() {
   return (
     <Routes>
@@ -58,6 +60,22 @@ function App() {
         element={
           <ProtectedRoute>
             <NewLoadPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/loads"
+        element={
+          <ProtectedRoute>
+            <LoadListPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/loads/:id"
+        element={
+          <ProtectedRoute>
+            <LoadDetailPage />
           </ProtectedRoute>
         }
       />

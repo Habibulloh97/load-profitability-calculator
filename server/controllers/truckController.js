@@ -83,7 +83,7 @@ export async function remove(req, res) {
     }
     return res.status(204).end();
   } catch (err) {
-    if (err.name == "CastError") {
+    if (err.name === "CastError") {
       return res.status(400).json({ error: "Invalid id format" });
     }
     return res.status(500).json({ error: "Server error" });
