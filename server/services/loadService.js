@@ -3,7 +3,7 @@ import Load from "../models/Load.js";
 import getFuelPrice from "./fuelService.js";
 import claculateBreakDown from "../calc/calculateBreakdown.js";
 
-export async function createLoad(
+export async function createLoad({
   accountId,
   rate,
   loadedMiles,
@@ -11,7 +11,9 @@ export async function createLoad(
   tolls,
   driverType,
   mpg,
-) {
+  stops,
+}) {
+  console.log(typeof accountId, accountId);
   const user = await User.findOne({ _id: accountId });
   const { dispatchRates, maintenanceRates, companyDriverPay } = user;
   const averageFuel = await getFuelPrice();
@@ -31,6 +33,7 @@ export async function createLoad(
   return await Load.create({
     accountId,
     driverType,
+    stops,
     loadedMiles,
     deadheadMiles,
     rate,

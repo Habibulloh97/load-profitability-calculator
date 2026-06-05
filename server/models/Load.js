@@ -1,9 +1,9 @@
 import mongoose from "mongoose";
-// const LocationSchema = new mongoose.Schema({
-//   address: { type: String, required: true },
-//   lat: { type: Number, required: true },
-//   lng: { type: Number, required: true },
-// });
+const LocationSchema = new mongoose.Schema({
+  address: { type: String, required: true },
+  lat: { type: Number, required: true },
+  lng: { type: Number, required: true },
+});
 
 const LoadSchema = new mongoose.Schema(
   {
@@ -24,16 +24,16 @@ const LoadSchema = new mongoose.Schema(
       enum: ["company", "lease", "ownerOp"],
       required: true,
     },
-    // driverCurrentLocation: { type: LocationSchema },
-    // stops: {
-    //   type: [LocationSchema],
-    //   validate: {
-    //     validator: function (arr) {
-    //       return arr.length >= 2;
-    //     },
-    //     message: "A load must have at least one pickup and delivery address",
-    //   },
-    // },
+    driverCurrentLocation: { type: LocationSchema },
+    stops: {
+      type: [LocationSchema],
+      validate: {
+        validator: function (arr) {
+          return arr.length >= 2;
+        },
+        message: "A load must have at least one pickup and delivery address",
+      },
+    },
     bolNumber: {
       type: String,
       required: function () {

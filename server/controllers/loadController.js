@@ -4,6 +4,10 @@ import {
   getLoad,
   deleteLoad,
 } from "../services/loadService.js";
+import {
+  fetchAddress,
+  calculateRouteMiles,
+} from "../api/integrations/mapbox.js";
 
 import User from "../models/User.js";
 import { listDrivers } from "../services/driverService.js";
@@ -12,15 +16,18 @@ export async function create(req, res) {
   try {
     const accountId = req.user._id;
     const { driverType } = req.body;
+    const stops = req.body.stops;
     const rate = Number(req.body.rate);
-    const loadedMiles = Number(req.body.loadedMiles);
+
     const deadheadMiles = Number(req.body.deadheadMiles);
     const tolls = Number(req.body.tolls);
     const mpg = Number(req.body.mpg);
-    if (!rate || !loadedMiles || !driverType) {
+    if (!rate || !driverType || !stops) {
       return res.status(400).json({ error: "All fields are required" });
     }
-    const load = await createLoad(
+    const geocoded = await Promise.all(stops.map((s) => fetchAddress(s)));
+    const loadedMiles = await calculateRouteMiles(geocoded);
+    const load = await createLoad({
       accountId,
       rate,
       loadedMiles,
@@ -28,7 +35,8 @@ export async function create(req, res) {
       tolls,
       driverType,
       mpg,
-    );
+      stops: geocoded,
+    });
     return res.status(201).json(load);
   } catch (err) {
     console.log(err);
