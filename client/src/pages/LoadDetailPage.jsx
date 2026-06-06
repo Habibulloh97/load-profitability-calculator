@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "@/lib/api.js";
 import { Button } from "@/components/ui/button";
+import { buildMapUrl } from "@/lib/mapbox.js";
 import {
   Card,
   CardContent,
@@ -56,7 +57,7 @@ export default function LoadDetailPage() {
         </svg>
         Back
       </button>
-      <Card className=" h-4xl w-2xl flex flex-col -translate-y-30">
+      <Card className=" h-4xl w-2xl flex flex-col justify-center">
         <CardHeader>
           <CardTitle>Full Load Info</CardTitle>
           <CardDescription>
@@ -65,6 +66,17 @@ export default function LoadDetailPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
+          <img src={buildMapUrl(data)} className="w-full rounded-md" />
+          <div className="grid grid-cols-2 gap-4">
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Pick Up Address</span>
+              <span className="font-semibold">{data.stops[0].address}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Deliver Adrress</span>
+              <span className="font-semibold">{data.stops[1].address}</span>
+            </div>
+          </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="flex justify-between">
               <span className="text-muted-foreground">Load Rate</span>

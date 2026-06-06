@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { SearchBox } from "@mapbox/search-js-react";
 
 import api from "@/lib/api.js";
 import { Input } from "@/components/ui/input";
@@ -21,15 +22,16 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
 
 export default function NewLoadPage() {
   const [formData, setFormData] = useState({
     rate: "",
-    loadedMiles: "",
-    deadheadMiles: 0,
     tolls: 0,
     driverType: "",
     mpg: 6.5,
+    stops: [],
+    driverCurrentLocation: null,
   });
   const [breakdown, setBreakDown] = useState({});
   const [open, setOPen] = useState(false);
@@ -74,6 +76,53 @@ export default function NewLoadPage() {
         </CardHeader>
         <CardContent>
           <form onSubmit={createLoad} className="space-y-4 max-w-2xl">
+            <div className="w-full">
+              <SearchBox
+                accessToken={import.meta.env.VITE_MAPBOX_PUBLIC_TOKEN}
+                options={{ types: "place", debounce: 300 }}
+                onRetrieve={(res) => {
+                  setFormData({
+                    ...formData,
+                    driverCurrentLocation: {
+                      address: res.features[0].properties.full_address,
+                      lat: res.features[0].properties.coordinates.latitude,
+                      lng: res.features[0].properties.coordinates.longitude,
+                    },
+                  });
+                }}
+              />
+            </div>
+            <div className="w-full">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() =>
+                  setFormData({ ...formData, stops: [...formData.stops, null] })
+                }
+              >
+                <Plus className="w-4 h-4 mr-1" /> Add stop
+              </Button>
+              <hr className="mt-3" />
+              {formData.stops.map((stop, index) => (
+                <div key={index} className="w-full">
+                  <SearchBox
+                    accessToken={import.meta.env.VITE_MAPBOX_PUBLIC_TOKEN}
+                    options={{ types: "place", debounce: 300 }}
+                    onRetrieve={(res) => {
+                      setFormData({
+                        ...formData,
+                        stop: {
+                          address: res.features[0].properties.full_address,
+                          lat: res.features[0].properties.coordinates.latitude,
+                          lng: res.features[0].properties.coordinates.longitude,
+                        },
+                      });
+                    }}
+                  />
+                </div>
+              ))}
+            </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="rate">Rate ($)</Label>
@@ -83,30 +132,6 @@ export default function NewLoadPage() {
                   value={formData.rate}
                   onChange={(e) =>
                     setFormData({ ...formData, rate: e.target.value })
-                  }
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="loadedMiles">Loaded Miles</Label>
-                <Input
-                  id="loadedMiles"
-                  type="number"
-                  value={formData.loadedMiles}
-                  onChange={(e) =>
-                    setFormData({ ...formData, loadedMiles: e.target.value })
-                  }
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="deadheadMiles">Deadhead Miles</Label>
-                <Input
-                  id="deadheadMiles"
-                  type="number"
-                  value={formData.deadheadMiles}
-                  onChange={(e) =>
-                    setFormData({ ...formData, deadheadMiles: e.target.value })
                   }
                 />
               </div>

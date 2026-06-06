@@ -145,6 +145,12 @@ Each entry follows: what I picked, what I considered, why.
 **Considered:** Per-user storage, fixed 7-day-elapsed expiry, cron job.
 **Why:** Diesel price is national/global, so one doc — not per-user duplication. A "7 days since fetch" rule drifts with whatever day you first fetch; anchoring to Tuesday (EIA publishes Monday, +1 day buffer) keeps refreshes aligned to the publish cadence regardless of launch day. Lazy refresh avoids cron infra for a value read on-demand anyway.
 
+## Route geometry: extended calculateRouteMiles return shape
+
+**Picked:** Changed calculateRouteMiles to return { miles, geometry } instead of just a number, so a single Directions API call supplies both the mileage and the route line for the static map.
+**Considered:** A separate function fetching geometry independently — cleaner isolation, no changes to existing callers.
+**Why:** Rejected the separate function because it doubles Directions API calls per load (cost + latency) for data already present in the same response. Accepted the cost of updating two call sites to destructure miles, since minimizing external API calls outweighs touching working code.
+
 ## Excluded from v1
 
 These features were considered and explicitly cut:

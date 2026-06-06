@@ -24,10 +24,12 @@ export async function calculateRouteMiles(stops) {
   try {
     const coordinates = stops.map((s) => `${s.lng},${s.lat}`).join(";");
     const res = await fetch(
-      `https://api.mapbox.com/directions/v5/mapbox/driving/${coordinates}?access_token=${process.env.MAPBOX_TOKEN}`,
+      `https://api.mapbox.com/directions/v5/mapbox/driving/${coordinates}?access_token=${process.env.MAPBOX_TOKEN}&geometries=polyline`,
     );
     const data = await res.json();
-    return Math.round(data.routes[0].distance / 1609.34);
+    const miles = Math.round(data.routes[0].distance / 1609.34);
+    const geometry = data.routes[0].geometry;
+    return { miles, geometry };
   } catch (err) {
     throw new Error(err.message);
   }

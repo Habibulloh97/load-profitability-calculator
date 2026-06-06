@@ -12,8 +12,10 @@ export async function createLoad({
   driverType,
   mpg,
   stops,
+  driverCurrentLocation,
+  deadheadMilesGeometry,
+  loadedMilesGeometry,
 }) {
-  console.log(typeof accountId, accountId);
   const user = await User.findOne({ _id: accountId });
   const { dispatchRates, maintenanceRates, companyDriverPay } = user;
   const averageFuel = await getFuelPrice();
@@ -34,8 +36,11 @@ export async function createLoad({
     accountId,
     driverType,
     stops,
+    driverCurrentLocation,
     loadedMiles,
     deadheadMiles,
+    deadheadMilesGeometry,
+    loadedMilesGeometry,
     rate,
     fuelPricePerGallon: averageFuel,
     tollsEstimate: tolls,

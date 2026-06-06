@@ -40,8 +40,16 @@ const LoadSchema = new mongoose.Schema(
         return this.status === "accepted";
       },
     },
-    loadedMiles: { type: Number, required: true },
-    deadheadMiles: { type: Number, default: 0 },
+    loadedMiles: {
+      type: Number,
+      required: true,
+    },
+    loadedMilesGeometry: { type: String, required: true },
+    deadheadMiles: {
+      type: Number,
+      default: 0,
+    },
+    deadheadMilesGeometry: { type: String, required: true },
     rate: { type: Number, required: true },
     fuelPricePerGallon: { type: Number, required: true },
     tollsEstimate: { type: Number, default: 0 },

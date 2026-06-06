@@ -18,15 +18,18 @@ export async function create(req, res) {
     const { driverType } = req.body;
     const stops = req.body.stops;
     const rate = Number(req.body.rate);
-
-    const deadheadMiles = Number(req.body.deadheadMiles);
+    const driverCurrentLocation = req.body.driverCurrentLocation;
     const tolls = Number(req.body.tolls);
     const mpg = Number(req.body.mpg);
     if (!rate || !driverType || !stops) {
       return res.status(400).json({ error: "All fields are required" });
     }
     const geocoded = await Promise.all(stops.map((s) => fetchAddress(s)));
-    const loadedMiles = await calculateRouteMiles(geocoded);
+    const driverLocationGeocoded = await fetchAddress(driverCurrentLocation);
+    const { miles: loadedMiles, geometry: loadedMilesGeometry } =
+      await calculateRouteMiles(geocoded);
+    const { miles: deadheadMiles, geometry: deadheadMilesGeometry } =
+      await calculateRouteMiles([driverLocationGeocoded, geocoded[0]]);
     const load = await createLoad({
       accountId,
       rate,
@@ -36,6 +39,9 @@ export async function create(req, res) {
       driverType,
       mpg,
       stops: geocoded,
+      driverCurrentLocation: driverLocationGeocoded,
+      deadheadMilesGeometry,
+      loadedMilesGeometry,
     });
     return res.status(201).json(load);
   } catch (err) {
