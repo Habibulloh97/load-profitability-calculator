@@ -52,6 +52,7 @@ export default function LoadListPage() {
       <Table>
         <TableHeader>
           <TableRow>
+            <TableHead>Date</TableHead>
             <TableHead>Loaded Miles</TableHead>
             <TableHead>Rate</TableHead>
             <TableHead>Rate Per Mile</TableHead>
@@ -63,6 +64,9 @@ export default function LoadListPage() {
         <TableBody>
           {data.map((d) => (
             <TableRow key={d._id}>
+              <TableCell>
+                {new Date(d.createdAt).toLocaleDateString("en-US")}
+              </TableCell>
               <TableCell>{d.loadedMiles}</TableCell>
               <TableCell>${d.rate}</TableCell>
               <TableCell>${(d.rate / d.loadedMiles).toFixed(2)}</TableCell>

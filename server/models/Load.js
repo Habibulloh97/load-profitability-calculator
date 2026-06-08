@@ -16,7 +16,7 @@ const LoadSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Driver",
       required: function () {
-        return this.status !== "draft";
+        return this.status === "assigned" || this.status === "dispatched";
       },
     },
     driverType: {
@@ -37,25 +37,25 @@ const LoadSchema = new mongoose.Schema(
     bolNumber: {
       type: String,
       required: function () {
-        return this.status === "accepted";
+        return this.status === "dispatched" || this.staus === "assigned";
       },
     },
     loadedMiles: {
       type: Number,
       required: true,
     },
-    loadedMilesGeometry: { type: String, required: true },
+    loadedMilesGeometry: { type: String, default: null },
     deadheadMiles: {
       type: Number,
       default: 0,
     },
-    deadheadMilesGeometry: { type: String, required: true },
+    deadheadMilesGeometry: { type: String, default: null },
     rate: { type: Number, required: true },
     fuelPricePerGallon: { type: Number, required: true },
     tollsEstimate: { type: Number, default: 0 },
     status: {
       type: String,
-      enum: ["draft", "accepted"],
+      enum: ["draft", "booked", "assigned", "dispatched"],
       default: "draft",
     },
     breakdown: {

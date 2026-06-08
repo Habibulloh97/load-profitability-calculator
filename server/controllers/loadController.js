@@ -14,22 +14,32 @@ import { listDrivers } from "../services/driverService.js";
 
 export async function create(req, res) {
   try {
+    console.log(req.body.driverCurrentLocation);
     const accountId = req.user._id;
-    const { driverType } = req.body;
-    const stops = req.body.stops;
+    const { driverType, stops, driverCurrentLocation } = req.body;
     const rate = Number(req.body.rate);
-    const driverCurrentLocation = req.body.driverCurrentLocation;
     const tolls = Number(req.body.tolls);
     const mpg = Number(req.body.mpg);
-    if (!rate || !driverType || !stops) {
+    if (!rate || !driverType || !stops || stops.length < 2) {
       return res.status(400).json({ error: "All fields are required" });
     }
-    const geocoded = await Promise.all(stops.map((s) => fetchAddress(s)));
-    const driverLocationGeocoded = await fetchAddress(driverCurrentLocation);
     const { miles: loadedMiles, geometry: loadedMilesGeometry } =
-      await calculateRouteMiles(geocoded);
-    const { miles: deadheadMiles, geometry: deadheadMilesGeometry } =
-      await calculateRouteMiles([driverLocationGeocoded, geocoded[0]]);
+      await calculateRouteMiles(stops);
+
+    let deadheadMiles = 0;
+    let deadheadMilesGeometry = 0;
+
+    if (driverCurrentLocation) {
+      console.log("deadhead block entered");
+      const deadhead = await calculateRouteMiles([
+        driverCurrentLocation,
+        stops[0],
+      ]);
+
+      deadheadMiles = deadhead.miles;
+      deadheadMilesGeometry = deadhead.geometry;
+    }
+
     const load = await createLoad({
       accountId,
       rate,
@@ -38,8 +48,8 @@ export async function create(req, res) {
       tolls,
       driverType,
       mpg,
-      stops: geocoded,
-      driverCurrentLocation: driverLocationGeocoded,
+      stops,
+      driverCurrentLocation,
       deadheadMilesGeometry,
       loadedMilesGeometry,
     });

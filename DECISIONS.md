@@ -151,6 +151,14 @@ Each entry follows: what I picked, what I considered, why.
 **Considered:** A separate function fetching geometry independently — cleaner isolation, no changes to existing callers.
 **Why:** Rejected the separate function because it doubles Directions API calls per load (cost + latency) for data already present in the same response. Accepted the cost of updating two call sites to destructure miles, since minimizing external API calls outweighs touching working code.
 
+## Load status lifecycle: independent BOL and driver assignment
+
+**Picked:** Four statuses — draft, booked, assigned, dispatched. BOL and driver assignment are independent paths. booked means BOL received but no driver. assigned means driver picked but no BOL. dispatched means both are set, load is ready to move.
+
+**Considered:** Linear status flow (draft → assigned → accepted) where BOL is required for acceptance. Rejected because real dispatch workflow doesn't follow that order — a load can be booked with a broker before a driver is available, or a driver can be assigned before paperwork arrives.
+
+**Why:** Matches real-world dispatch operations where BOL and driver availability are independent constraints. Prevents blocking one action on the other, which would force dispatchers into an unnatural workflow.
+
 ## Excluded from v1
 
 These features were considered and explicitly cut:
