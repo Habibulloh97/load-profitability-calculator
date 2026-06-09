@@ -12,14 +12,7 @@ export default defineConfig({
     },
   },
   define: {
-    // This provides a global safety fallback for third-party scripts expecting Node environments
-    "process.env": {
-      NODE_ENV: JSON.stringify("production"),
-    },
-    "global.process": {
-      env: {
-        NODE_ENV: JSON.stringify("production"),
-      },
-    },
+    "process.env": {},
+    process: { env: {} },
   },
 });
