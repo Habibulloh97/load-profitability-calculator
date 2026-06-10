@@ -71,7 +71,10 @@ export default function LoadListPage() {
               <TableCell>${d.rate}</TableCell>
               <TableCell>${(d.rate / d.loadedMiles).toFixed(2)}</TableCell>
               <TableCell>
-                {d.status === "draft" ? "Draft" : "Accepted"}
+                {d.status === "draft" && "Draft"}
+                {d.status === "assigned" && "Assigned"}
+                {d.status === "dispatched" && "Dispatched"}
+                {d.status === "booked" && "Booked"}
               </TableCell>
               <TableCell>
                 <ChevronRight

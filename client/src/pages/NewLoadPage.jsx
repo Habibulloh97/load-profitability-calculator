@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, act } from "react";
 import { SearchBox } from "@mapbox/search-js-react";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
@@ -8,6 +8,16 @@ import api from "@/lib/api.js";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import {
   Card,
   CardContent,
@@ -24,6 +34,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { meta } from "eslint-plugin-react-hooks";
@@ -37,6 +54,7 @@ export default function NewLoadPage() {
     mpg: 6.5,
     stops: [null, null],
     driverCurrentLocation: null,
+    bolNumber: null,
   });
   const [drivers, setDrivers] = useState([]);
   const [selectedDriver, setSelectedDriver] = useState(null);
@@ -46,6 +64,9 @@ export default function NewLoadPage() {
   const [error, setError] = useState("");
   const [resetKey, setResetKey] = useState(0);
   const [loadResult, setLoadResult] = useState(null);
+  const [actionOpen, setActionOpen] = useState(false);
+  const [action, setAction] = useState("");
+  const [confirmOpen, setConfirmOpen] = useState(false);
   const mapContainer = useRef(null);
   const mapRef = useRef(null);
   const markerRef = useRef([]);
@@ -88,9 +109,18 @@ export default function NewLoadPage() {
     }));
   }
 
+  async function updateLoadStatus(updates) {
+    try {
+      const res = await api.patch(`/api/loads/${loadResult._id}`, updates);
+    } catch (err) {
+      setError(err.response?.data?.error || "Something went wrong");
+    }
+  }
+
   useEffect(() => {
     async function fetchDrivers() {
       const res = await api.get("/api/drivers");
+      console.log(res.data);
       setDrivers(res.data);
     }
     fetchDrivers();
@@ -166,7 +196,7 @@ export default function NewLoadPage() {
       }
 
       if (formData.driverCurrentLocation && validStops.length > 0) {
-        const deadheadCoords = `${formData.driverCurrentLocation.lng},${formData.driverCurrentLocation.lat}; ${validStops[0].lng},${validStops[0].lat}`;
+        const deadheadCoords = `${formData.driverCurrentLocation.lng},${formData.driverCurrentLocation.lat};${validStops[0].lng},${validStops[0].lat}`;
         const dhRes = await fetch(
           `https://api.mapbox.com/directions/v5/mapbox/driving/${deadheadCoords}?geometries=geojson&access_token=${import.meta.env.VITE_MAPBOX_PUBLIC_TOKEN}`,
         );
@@ -302,6 +332,36 @@ export default function NewLoadPage() {
                 </Button>
               </div>
               <div className="grid grid-cols-2 gap-4 mt-auto pt-4">
+                <div className="space-y-2 col-span-2">
+                  <Select
+                    onValueChange={(id) => {
+                      if (id === "none") {
+                        setSelectedDriver(null);
+                        setFormData((prev) => ({ ...prev, driverType: "" }));
+                        return;
+                      }
+                      const driver = drivers.find((d) => d._id === id);
+                      setSelectedDriver(driver);
+                      setFormData((prev) => ({
+                        ...prev,
+                        driverType: driver.type,
+                        mpg: driver.truckId?.mpg || prev.mpg,
+                      }));
+                    }}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a driver (optional)" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">No driver</SelectItem>
+                      {drivers.map((d) => (
+                        <SelectItem key={d._id} value={d._id}>
+                          {d.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
                 <div className="space-y-2">
                   <Label htmlFor="rate">Rate ($)</Label>
                   <Input
@@ -331,29 +391,47 @@ export default function NewLoadPage() {
                     }
                   />
                 </div>
+                {!selectedDriver?.truckId?.mpg && (
+                  <div className="space-y-2">
+                    <Label htmlFor="tolls">MPG (Optional) </Label>
+                    <Input
+                      id="tolls"
+                      type="number"
+                      value={formData.mpg}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          mpg: e.target.value,
+                        }))
+                      }
+                    />
+                  </div>
+                )}
                 <div className="space-y-2 col-span-2">
-                  <RadioGroup
-                    className="flex gap-6"
-                    onValueChange={(value) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        driverType: value,
-                      }))
-                    }
-                  >
-                    <div className="flex items-center gap-3">
-                      <RadioGroupItem value="company" id="company" />
-                      <Label htmlFor="company">Company Driver</Label>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <RadioGroupItem value="lease" id="lease" />
-                      <Label htmlFor="lease">Lease Driver</Label>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <RadioGroupItem value="ownerOp" id="ownerOP" />
-                      <Label htmlFor="ownerOp">Owner Operator</Label>
-                    </div>
-                  </RadioGroup>
+                  {!selectedDriver && (
+                    <RadioGroup
+                      className="flex gap-6"
+                      onValueChange={(value) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          driverType: value,
+                        }))
+                      }
+                    >
+                      <div className="flex items-center gap-3">
+                        <RadioGroupItem value="company" id="company" />
+                        <Label htmlFor="company">Company Driver</Label>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <RadioGroupItem value="lease" id="lease" />
+                        <Label htmlFor="lease">Lease Driver</Label>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <RadioGroupItem value="ownerOp" id="ownerOP" />
+                        <Label htmlFor="ownerOp">Owner Operator</Label>
+                      </div>
+                    </RadioGroup>
+                  )}
                 </div>
               </div>
               <Button type="submit">Calulate The Load</Button>
@@ -367,6 +445,7 @@ export default function NewLoadPage() {
                     tolls: 0,
                     driverType: "",
                     mpg: 6.5,
+                    bolNumber: null,
                   });
                   setResetKey((prev) => prev + 1);
                   if (mapRef.current.getSource("route")) {
@@ -388,124 +467,278 @@ export default function NewLoadPage() {
       <div ref={mapContainer} className="flex-1" />
       {loadResult && (
         <Dialog open={open} onOpenChange={setOPen}>
-          <DialogContent showCloseButton={true}>
+          <DialogContent
+            showCloseButton={true}
+            className="!max-w-[75vw] overflow-y-auto"
+          >
             <DialogHeader>
               <DialogTitle>Full Load Breakdown</DialogTitle>
               <DialogDescription>
-                Full cost and profit breakdown for this load:
+                {loadResult.driverCurrentLocation?.address} →{" "}
+                {loadResult.stops[0].address} →{" "}
+                {loadResult.stops[loadResult.stops.length - 1].address}
               </DialogDescription>
             </DialogHeader>
-            <Card className="flex-1">
-              <CardHeader>
-                <CardTitle className="text-sm">Route Info</CardTitle>
-              </CardHeader>
-              <CardContent>
+
+            <div className="flex gap-6">
+              {/* LEFT — map */}
+              <div className="flex-[2]">
+                {console.log(buildMapUrl(loadResult))}
                 <img
                   src={buildMapUrl(loadResult)}
                   className="w-full rounded-md"
                 />
-              </CardContent>
-            </Card>
-            <Card className="flex-1">
-              <CardHeader>
-                <CardTitle className="text-sm">Financial Details</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 gap-4">
+              </div>
+
+              {/* RIGHT — profit first, details secondary */}
+              <div className="flex-[1] flex flex-col gap-6">
+                {/* PRIMARY */}
+                <div className="flex flex-col gap-1">
+                  <span className="text-xs text-muted-foreground uppercase tracking-wide">
+                    Net Profit
+                  </span>
+                  <span className="text-3xl font-bold text-green-600">
+                    ${loadResult.breakdown.netProfit}
+                  </span>
+                  <span className="text-lg font-semibold text-muted-foreground">
+                    {loadResult.breakdown.profitPercent}% margin
+                  </span>
+                </div>
+
+                {/* SECONDARY */}
+                <div className="flex flex-col gap-2 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Load Rate</span>
-                    <span className="font-semibold">${loadResult.rate}</span>
+                    <span className="text-muted-foreground">Rate</span>
+                    <span className="font-medium">${loadResult.rate}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Load RPM</span>
-                    <span className="font-semibold">
+                    <span className="text-muted-foreground">RPM</span>
+                    <span className="font-medium">
                       ${loadResult.breakdown.ratePerMile}
                     </span>
                   </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Total Miles</span>
+                    <span className="font-medium">
+                      {loadResult.breakdown.totalMiles} mi
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Deadhead</span>
+                    <span className="font-medium">
+                      {loadResult.deadheadMiles} mi
+                    </span>
+                  </div>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Net Profit</span>
-                    <span className="font-semibold">
-                      ${loadResult.breakdown.netProfit}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Profit %</span>
-                    <span className="font-semibold">
-                      {loadResult.breakdown.profitPercent}%
-                    </span>
-                  </div>
+
+                {/* TERTIARY */}
+                <div className="flex flex-col gap-2 text-sm border-t pt-4">
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">
                       Total Expenses
                     </span>
-                    <span className="font-semibold">
+                    <span className="font-medium">
                       ${loadResult.breakdown.totalCost}
                     </span>
                   </div>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Total Miles</span>
-                  <span className="font-semibold">
-                    {loadResult.breakdown.totalMiles}Miles
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Fuel</span>
+                    <span className="font-medium">
+                      ${loadResult.breakdown.fuel}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Tolls</span>
+                    <span className="font-medium">
+                      ${loadResult.tollsEstimate}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Maintenance</span>
+                    <span className="font-medium">
+                      ${loadResult.breakdown.maintenance}
+                    </span>
+                  </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">
-                      Deadhead Miles
+                      {loadResult.driverType === "company"
+                        ? "Driver Pay"
+                        : "Dispatch Fee"}
                     </span>
-                    <span className="font-semibold">
-                      {loadResult.breakdown.deadheadMiles} Miles
+                    <span className="font-medium">
+                      $
+                      {loadResult.driverType === "company"
+                        ? loadResult.breakdown.driverPay
+                        : loadResult.breakdown.dispatchFee}
                     </span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Loaded Miles</span>
-                    <span className="font-semibold">
-                      {loadResult.breakdown.loadedMiles} Miles
-                    </span>
-                  </div>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">
-                    {loadResult.driverType === "company"
-                      ? "Driver Pay"
-                      : "Dispatch Pay"}
-                  </span>
-                  <span className="font-semibold">
-                    $
-                    {loadResult.driverType === "company"
-                      ? loadResult.breakdown.driverPay
-                      : loadResult.breakdown.dispatchFee}
-                  </span>
+                <div className="mt-auto">
+                  <Button
+                    className="w-full"
+                    onClick={() => setActionOpen(true)}
+                  >
+                    Actions
+                  </Button>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">
-                    Fuel Cost (Based on national average)
-                  </span>
-                  <span className="font-semibold">
-                    ${loadResult.breakdown.fuel}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">
-                    Maintenance Fee Cost
-                  </span>
-                  <span className="font-semibold">
-                    ${loadResult.breakdown.maintenance}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Tolls</span>
-                  <span className="font-semibold">${loadResult.tolls}</span>
-                </div>
-              </CardContent>
-            </Card>
+                <>
+                  <Dialog open={actionOpen} onOpenChange={setActionOpen}>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Load Actions</DialogTitle>
+                      </DialogHeader>
+                      <div className="flex gap-2">
+                        <Button
+                          variant={action === "assign" ? "default" : "outline"}
+                          onClick={() => setAction("assign")}
+                        >
+                          Assign Driver
+                        </Button>
+                        <Button
+                          variant={action === "book" ? "default" : "outline"}
+                          onClick={() => setAction("book")}
+                        >
+                          Book Load
+                        </Button>
+                        <Button
+                          variant={
+                            action === "dispatch" ? "default" : "outline"
+                          }
+                          onClick={() => setAction("dispatch")}
+                        >
+                          Dispatch
+                        </Button>
+                      </div>
+
+                      {action === "assign" && (
+                        <Select
+                          onValueChange={(id) =>
+                            setSelectedDriver(drivers.find((d) => d._id === id))
+                          }
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a driver" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {drivers.map((d) => (
+                              <SelectItem key={d._id} value={d._id}>
+                                {d.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      )}
+
+                      {action === "book" && (
+                        <Input
+                          placeholder="Enter BOL number"
+                          value={formData.bolNumber || ""}
+                          onChange={(e) =>
+                            setFormData((prev) => ({
+                              ...prev,
+                              bolNumber: e.target.value,
+                            }))
+                          }
+                        />
+                      )}
+
+                      {action === "dispatch" && (
+                        <div className="flex flex-col gap-3">
+                          <Input
+                            placeholder="Enter BOL number"
+                            value={formData.bolNumber || ""}
+                            onChange={(e) =>
+                              setFormData((prev) => ({
+                                ...prev,
+                                bolNumber: e.target.value,
+                              }))
+                            }
+                          />
+                          <Select
+                            onValueChange={(id) =>
+                              setSelectedDriver(
+                                drivers.find((d) => d._id === id),
+                              )
+                            }
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select a driver" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {drivers.map((d) => (
+                                <SelectItem key={d._id} value={d._id}>
+                                  {d.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      )}
+
+                      <Button
+                        className="w-full mt-2"
+                        disabled={
+                          !action ||
+                          (action === "assign" && !selectedDriver) ||
+                          (action === "book" && !formData.bolNumber) ||
+                          (action === "dispatch" &&
+                            (!formData.bolNumber || !selectedDriver))
+                        }
+                        onClick={() => setConfirmOpen(true)}
+                      >
+                        Confirm
+                      </Button>
+                    </DialogContent>
+                  </Dialog>
+
+                  <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          {action === "assign" &&
+                            `Assign this load to ${selectedDriver?.name}?`}
+                          {action === "book" && "Mark this load as booked?"}
+                          {action === "dispatch" &&
+                            `Dispatch to ${selectedDriver?.name} with BOL ${formData.bolNumber}?`}
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={async () => {
+                            const payloads = {
+                              assign: {
+                                driverId: selectedDriver?._id,
+                                status: "assigned",
+                              },
+                              book: {
+                                bolNumber: formData.bolNumber,
+                                status: "booked",
+                              },
+                              dispatch: {
+                                bolNumber: formData.bolNumber,
+                                driverId: selectedDriver?._id,
+                                status: "dispatched",
+                              },
+                            };
+                            await updateLoadStatus(payloads[action]);
+                            setConfirmOpen(false);
+                            setActionOpen(false);
+                            setOPen(false);
+                          }}
+                        >
+                          Confirm
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </>
+              </div>
+            </div>
           </DialogContent>
         </Dialog>
-      )}
+      )}{" "}
     </div>
   );
 }

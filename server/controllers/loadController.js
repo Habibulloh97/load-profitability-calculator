@@ -2,6 +2,7 @@ import {
   createLoad,
   loadList,
   getLoad,
+  updateLoad,
   deleteLoad,
 } from "../services/loadService.js";
 import {
@@ -11,6 +12,7 @@ import {
 
 import User from "../models/User.js";
 import { listDrivers } from "../services/driverService.js";
+import Load from "../models/Load.js";
 
 export async function create(req, res) {
   try {
@@ -23,6 +25,7 @@ export async function create(req, res) {
     if (!rate || !driverType || !stops || stops.length < 2) {
       return res.status(400).json({ error: "All fields are required" });
     }
+
     const { miles: loadedMiles, geometry: loadedMilesGeometry } =
       await calculateRouteMiles(stops);
 
@@ -80,6 +83,22 @@ export async function get(req, res) {
     const load = await getLoad(id, accountId);
     if (!load) return res.status(404).json({ error: "Not found!" });
     return res.status(200).json(load);
+  } catch (err) {
+    return res.status(500).json({ error: "Server error" });
+  }
+}
+
+export async function update(req, res) {
+  try {
+    const id = req.params.id;
+    const accountId = req.user.id;
+    const updates = req.body;
+    const load = await getLoad(id, accountId);
+    if (!load) {
+      return res.status(404).json({ error: "Not found!" });
+    }
+    const updatedLoad = await updateLoad(id, accountId, updates);
+    return res.status(200).json(updatedLoad);
   } catch (err) {
     return res.status(500).json({ error: "Server error" });
   }

@@ -57,6 +57,17 @@ export async function getLoad(id, accountId) {
   return await Load.findOne({ _id: id, accountId });
 }
 
+export async function updateLoad(id, accountId, updates) {
+  return await Load.findOneAndUpdate(
+    { _id: id, accountId },
+    { $set: updates },
+    {
+      returnDocument: "after",
+      runValidators: true,
+    },
+  );
+}
+
 export async function deleteLoad(id, accountId) {
   return await Load.findOneAndDelete({ _id: id, accountId });
 }

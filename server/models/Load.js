@@ -37,7 +37,7 @@ const LoadSchema = new mongoose.Schema(
     bolNumber: {
       type: String,
       required: function () {
-        return this.status === "dispatched" || this.staus === "assigned";
+        return this.status === "dispatched";
       },
     },
     loadedMiles: {
