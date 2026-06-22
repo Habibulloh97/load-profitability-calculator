@@ -89,13 +89,25 @@ export async function updatePassword(req, res) {
     return res.status(500).json({ error: "Something went wrong" });
   }
 }
+export async function logout(req, res) {
+  res.clearCookie("token", {
+    httpOnly: true,
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    secure: process.env.NODE_ENV === "production",
+  });
+  return res.status(200).json({ message: "Logged out" });
+}
 
 export async function remove(req, res) {
   try {
     const id = req.user._id;
     const password = req.body.password;
     const removed = await deleteUser(id, password);
-    res.clearCookie("token");
+    res.clearCookie("token", {
+      httpOnly: true,
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      secure: process.env.NODE_ENV === "production",
+    });
     return res.status(204).end();
   } catch (err) {
     if (err.message === "Password is incorrect") {

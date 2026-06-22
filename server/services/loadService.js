@@ -49,8 +49,20 @@ export async function createLoad({
   });
 }
 
-export async function loadList(accountId) {
-  return await Load.find({ accountId });
+export async function loadList(
+  accountId,
+  page = 1,
+  limit = 25,
+  driverId = null,
+) {
+  const filter = { accountId };
+  if (driverId) filter.driverId = driverId;
+  const skip = (page - 1) * limit;
+  const [loads, total] = await Promise.all([
+    Load.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit),
+    Load.countDocuments(filter),
+  ]);
+  return { loads, total };
 }
 
 export async function getLoad(id, accountId) {

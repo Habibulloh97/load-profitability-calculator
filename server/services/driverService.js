@@ -9,7 +9,7 @@ export async function listDrivers(accountId) {
 }
 
 export async function getDriver(id, accountId) {
-  return await Driver.findOne({ _id: id, accountId });
+  return await Driver.findOne({ _id: id, accountId }).populate("truckId");
 }
 
 export async function updateDriver(id, accountId, updates) {

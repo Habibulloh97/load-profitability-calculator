@@ -43,7 +43,6 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
-import { meta } from "eslint-plugin-react-hooks";
 
 export default function NewLoadPage() {
   const [formData, setFormData] = useState({
@@ -631,7 +630,7 @@ export default function NewLoadPage() {
 
                       {action === "book" && (
                         <Input
-                          placeholder="Enter BOL number"
+                          placeholder="Enter BOL number (Optional)"
                           value={formData.bolNumber || ""}
                           onChange={(e) =>
                             setFormData((prev) => ({
@@ -680,7 +679,6 @@ export default function NewLoadPage() {
                         disabled={
                           !action ||
                           (action === "assign" && !selectedDriver) ||
-                          (action === "book" && !formData.bolNumber) ||
                           (action === "dispatch" &&
                             (!formData.bolNumber || !selectedDriver))
                         }

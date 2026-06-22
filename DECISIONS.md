@@ -159,6 +159,12 @@ Each entry follows: what I picked, what I considered, why.
 
 **Why:** Matches real-world dispatch operations where BOL and driver availability are independent constraints. Prevents blocking one action on the other, which would force dispatchers into an unnatural workflow.
 
+## Dashboard profit aggregation: branches by driver type
+
+**Picked:** Weekly net profit aggregates differently per driver type. For company drivers, sum breakdown.netProfit (company covers all costs, keeps the remainder). For lease and owner-op, sum breakdown.dispatchFee (driver covers their own costs, company only keeps the dispatch fee).
+
+**Why:** Rejected because netProfit for lease/owner-op represents what the driver keeps after their costs — not what the dispatching company keeps. The company's income on those loads is only the dispatch percentage. Using netProfit across the board would overstate company profit on lease and owner-op loads. This distinction comes directly from real dispatch operations where company drivers are W2 employees (all costs flow through the company) while lease and owner-op drivers are independent contractors (company collects a dispatch fee only).
+
 ## Excluded from v1
 
 These features were considered and explicitly cut:

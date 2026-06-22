@@ -3,6 +3,7 @@ import SignupPage from "./pages/SignupPage.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
 import DashboardPage from "./pages/DashboardPage.jsx";
 import ProtectedRoute from "./components/ui/ProtectedRoute.jsx";
+import PublicRoute from "./components/ui/PublicRoute.jsx";
 import SettingsPage from "./pages/SettingsPage.jsx";
 import { Button } from "./components/ui/button";
 import TrucksPage from "./pages/TrucksPage.jsx";
@@ -10,75 +11,51 @@ import DriversPage from "./pages/DriversPage.jsx";
 import NewLoadPage from "./pages/NewLoadPage.jsx";
 import LoadListPage from "./pages/LoadListPage.jsx";
 import LoadDetailPage from "./pages/LoadDetailPage.jsx";
+import DashboardLayout from "./pages/DashboardLayout.jsx";
+import DriverDetailPage from "./pages/DriverDetailPage.jsx";
 function App() {
   return (
     <Routes>
-      <Route path="/signup" element={<SignupPage />} />
-      <Route path="/login" element={<LoginPage />} />
       <Route
-        path="/dashboard"
+        path="/"
         element={
-          <ProtectedRoute>
-            <DashboardPage />
-          </ProtectedRoute>
+          <PublicRoute>
+            <LoginPage />
+          </PublicRoute>
         }
       />
       <Route
-        path="/settings"
+        path="/signup"
         element={
-          <ProtectedRoute>
-            <SettingsPage />
-          </ProtectedRoute>
+          <PublicRoute>
+            <SignupPage />
+          </PublicRoute>
         }
       />
       <Route
-        path="/trucks"
+        path="/login"
         element={
-          <ProtectedRoute>
-            <TrucksPage />
-          </ProtectedRoute>
+          <PublicRoute>
+            <LoginPage />
+          </PublicRoute>
         }
       />
       <Route
-        path="/drivers"
         element={
           <ProtectedRoute>
-            <DriversPage />
+            <DashboardLayout />
           </ProtectedRoute>
         }
-      />
-      <Route
-        path="/settings"
-        element={
-          <ProtectedRoute>
-            <SettingsPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/load"
-        element={
-          <ProtectedRoute>
-            <NewLoadPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/loads"
-        element={
-          <ProtectedRoute>
-            <LoadListPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/loads/:id"
-        element={
-          <ProtectedRoute>
-            <LoadDetailPage />
-          </ProtectedRoute>
-        }
-      />
+      >
+        <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/trucks" element={<TrucksPage />} />
+        <Route path="/drivers" element={<DriversPage />} />
+        <Route path="/drivers/:id" element={<DriverDetailPage />} />
+        <Route path="/load" element={<NewLoadPage />} />
+        <Route path="/loads" element={<LoadListPage />} />
+        <Route path="/loads/:id" element={<LoadDetailPage />} />
+      </Route>
     </Routes>
   );
 }

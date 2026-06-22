@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import api from "@/lib/api.js";
 import {
   Table,
@@ -22,7 +23,7 @@ import {
   DialogContent,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2, Plus, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 export default function DriversPage() {
@@ -116,6 +117,7 @@ export default function DriversPage() {
     fetchTrucks();
   }, []);
 
+  const navigate = useNavigate();
   const availableTrucks = trucks.filter(
     (t) =>
       !data.some(
@@ -124,14 +126,154 @@ export default function DriversPage() {
   );
   return (
     <div>
-      <h2>Driver List</h2>
+      <h1 className="text-center text-2xl font-bold py-4">Drivers</h1>
+      <div className="flex justify-end mb-4">
+        <Dialog
+          open={open}
+          onOpenChange={(val) => {
+            setOpen(val);
+            setFormError("");
+            setFormData({ name: "", type: "", truckId: "" });
+          }}
+        >
+          <DialogTrigger asChild>
+            <Button variant="outline" size="sm">
+              <Plus className="w-4 h-4 mr-1" /> Add Driver
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogTitle>
+              {selectedDriver ? "Edit Driver" : "Add Driver"}
+            </DialogTitle>
+            {selectedDriver ? (
+              <form onSubmit={edit}>
+                {formError && <p style={{ color: "red" }}>{formError}</p>}
+                <div className="flex flex-col gap-3">
+                  <Input
+                    type="text"
+                    value={formData.name}
+                    placeholder="Enter Driver's Name"
+                    onChange={(e) =>
+                      setFormData({ ...formData, name: e.target.value })
+                    }
+                  ></Input>
+
+                  <Select
+                    value={formData.type}
+                    onValueChange={(value) =>
+                      setFormData({ ...formData, type: value })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue
+                        placeholder="Select Type"
+                        value={formData.type}
+                      />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="company">Company</SelectItem>
+                      <SelectItem value="lease">Lease Driver</SelectItem>
+                      <SelectItem value="ownerOp">Owner Operator</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {trucks.length > 0 && (
+                    <Select
+                      value={formData.truckId}
+                      onValueChange={(value) =>
+                        setFormData({ ...formData, truckId: value })
+                      }
+                      disabled={availableTrucks.length === 0}
+                    >
+                      <SelectTrigger>
+                        <SelectValue
+                          placeholder={
+                            availableTrucks.length === 0
+                              ? "No trucks available"
+                              : "Select Truck"
+                          }
+                        />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {selectedDriver?.truckId?._id && (
+                          <SelectItem value="none">Unassign</SelectItem>
+                        )}
+                        {availableTrucks.map((t) => (
+                          <SelectItem value={t._id} key={t._id}>
+                            {t.number}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                  <Button type="submit">Edit Driver</Button>
+                </div>
+              </form>
+            ) : (
+              <form onSubmit={addDriver}>
+                {formError && <p style={{ color: "red" }}>{formError}</p>}
+                <div className="flex flex-col gap-3">
+                  <Input
+                    placeholder="Enter Driver's Name"
+                    type="text"
+                    value={formData.name}
+                    onChange={(e) =>
+                      setFormData({ ...formData, name: e.target.value })
+                    }
+                  />
+
+                  <Select
+                    value={formData.type}
+                    onValueChange={(value) =>
+                      setFormData({ ...formData, type: value })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select Type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="company">Company</SelectItem>
+                      <SelectItem value="lease">Lease Driver</SelectItem>
+                      <SelectItem value="ownerOp">Owner Operator</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {trucks.length > 0 && (
+                    <Select
+                      value={formData.truckId}
+                      onValueChange={(value) =>
+                        setFormData({ ...formData, truckId: value })
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select Truck" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {trucks
+                          .filter(
+                            (t) => !data.some((d) => d.truckId?._id === t._id),
+                          )
+                          .map((t) => (
+                            <SelectItem value={t._id} key={t._id}>
+                              {t.number}
+                            </SelectItem>
+                          ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                  <Button type="submit">Add Driver</Button>
+                </div>
+              </form>
+            )}
+          </DialogContent>
+        </Dialog>
+      </div>
       <Table>
         <TableHeader>
           <TableRow>
             <TableHead>Driver Name</TableHead>
             <TableHead>Driver Type</TableHead>
-            <TableHead>Driver's Truck</TableHead>
+            <TableHead>Assigned Truck</TableHead>
             <TableHead>Actions</TableHead>
+            <TableHead>Detailed Info</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -164,6 +306,12 @@ export default function DriversPage() {
                     <Trash2 size={16} onClick={() => remove(d._id)} />
                   </div>
                 </TableCell>
+                <TableCell>
+                  <ChevronRight
+                    className="cursor-pointer"
+                    onClick={() => navigate(`/drivers/${d._id}`)}
+                  />
+                </TableCell>
               </TableRow>
             ))}
         </TableBody>
@@ -171,142 +319,6 @@ export default function DriversPage() {
 
       {loading && <p>Loading...</p>}
       {listError && <p>{listError}</p>}
-
-      <Dialog
-        open={open}
-        onOpenChange={(val) => {
-          setOpen(val);
-          setFormError("");
-          setFormData({ name: "", type: "", truckId: "" });
-        }}
-      >
-        <DialogTrigger asChild>
-          <Button>Add Driver</Button>
-        </DialogTrigger>
-        <DialogContent>
-          <DialogTitle>
-            {selectedDriver ? "Edit Driver" : "Add Driver"}
-          </DialogTitle>
-          {selectedDriver ? (
-            <form onSubmit={edit}>
-              {formError && <p style={{ color: "red" }}>{formError}</p>}
-              <div className="flex flex-col gap-3">
-                <Input
-                  type="text"
-                  value={formData.name}
-                  placeholder="Enter Driver's Name"
-                  onChange={(e) =>
-                    setFormData({ ...formData, name: e.target.value })
-                  }
-                ></Input>
-
-                <Select
-                  value={formData.type}
-                  onValueChange={(value) =>
-                    setFormData({ ...formData, type: value })
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue
-                      placeholder="Select Type"
-                      value={formData.type}
-                    />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="company">Company</SelectItem>
-                    <SelectItem value="lease">Lease Driver</SelectItem>
-                    <SelectItem value="ownerOp">Owner Operator</SelectItem>
-                  </SelectContent>
-                </Select>
-                {trucks.length > 0 && (
-                  <Select
-                    value={formData.truckId}
-                    onValueChange={(value) =>
-                      setFormData({ ...formData, truckId: value })
-                    }
-                    disabled={availableTrucks.length === 0}
-                  >
-                    <SelectTrigger>
-                      <SelectValue
-                        placeholder={
-                          availableTrucks.length === 0
-                            ? "No trucks available"
-                            : "Select Truck"
-                        }
-                      />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {selectedDriver?.truckId?._id && (
-                        <SelectItem value="none">Unassign</SelectItem>
-                      )}
-                      {availableTrucks.map((t) => (
-                        <SelectItem value={t._id} key={t._id}>
-                          {t.number}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
-                <Button type="submit">Edit Driver</Button>
-              </div>
-            </form>
-          ) : (
-            <form onSubmit={addDriver}>
-              {formError && <p style={{ color: "red" }}>{formError}</p>}
-              <div className="flex flex-col gap-3">
-                <Input
-                  placeholder="Enter Driver's Name"
-                  type="text"
-                  value={formData.name}
-                  onChange={(e) =>
-                    setFormData({ ...formData, name: e.target.value })
-                  }
-                />
-
-                <Select
-                  value={formData.type}
-                  onValueChange={(value) =>
-                    setFormData({ ...formData, type: value })
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select Type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="company">Company</SelectItem>
-                    <SelectItem value="lease">Lease Driver</SelectItem>
-                    <SelectItem value="ownerOp">Owner Operator</SelectItem>
-                  </SelectContent>
-                </Select>
-                {trucks.length > 0 && (
-                  <Select
-                    value={formData.truckId}
-                    onValueChange={(value) =>
-                      setFormData({ ...formData, truckId: value })
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select Truck" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {trucks
-                        .filter(
-                          (t) => !data.some((d) => d.truckId?._id === t._id),
-                        )
-                        .map((t) => (
-                          <SelectItem value={t._id} key={t._id}>
-                            {t.number}
-                          </SelectItem>
-                        ))}
-                    </SelectContent>
-                  </Select>
-                )}
-                <Button type="submit">Add Driver</Button>
-              </div>
-            </form>
-          )}
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

@@ -68,7 +68,10 @@ export async function create(req, res) {
 
 export async function list(req, res) {
   try {
-    const loads = await loadList(req.user.id);
+    const driverId = req.query.driverId || null;
+    const page = Number(req.query.page || 1);
+    const limit = Number(req.query.limit || 25);
+    const loads = await loadList(req.user.id, page, limit, driverId);
     return res.status(200).json(loads);
   } catch (err) {
     console.log(err);
