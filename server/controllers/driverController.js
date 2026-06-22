@@ -8,7 +8,8 @@ import {
 
 export async function create(req, res) {
   try {
-    const { name, type, truckId } = req.body;
+    const { name, type } = req.body;
+    const truckId = req.body.truckId || undefined;
     if (!name || !type) {
       return res.status(400).json({ error: "Name and type required" });
     }
