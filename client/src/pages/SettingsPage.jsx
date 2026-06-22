@@ -195,9 +195,7 @@ export default function SettingsPage() {
           setEditRates(false);
         }}
       >
-        {/* Sidebar Container: Swapped w-1/5 for a fixed, elegant width */}
         <div className="w-64 h-full bg-muted/40 border-r p-6 flex flex-col justify-start gap-6">
-          {/* Dynamic Header Anchor */}
           <div>
             <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/70 px-2">
               Settings
@@ -705,16 +703,14 @@ export default function SettingsPage() {
                   <CardContent className="py-2">
                     <div className="space-y-3 text-sm">
                       <div className="flex justify-between border-b pb-2">
-                        {/* <span className="text-muted-foreground">
+                        <span className="text-muted-foreground">
                           Current Password
-                        </span> */}
+                        </span>
                         <input
                           type="password"
-                          placeholder="Current Password"
+                          placeholder="••••••••"
                           value={passwordForm.currentPassword}
-                          className={
-                            "text-center font-medium text-foreground px-5 border rounded-md"
-                          }
+                          className="font-medium text-foreground px-3 border rounded-md"
                           onChange={(e) =>
                             setPasswordForm({
                               ...passwordForm,
@@ -724,16 +720,14 @@ export default function SettingsPage() {
                         />
                       </div>
                       <div className="flex justify-between border-b pb-2">
-                        {/* <span className="text-muted-foreground ">
+                        <span className="text-muted-foreground">
                           New Password
-                        </span> */}
+                        </span>
                         <input
-                          placeholder="New Password"
                           type="password"
-                          className={
-                            "text-center font-medium text-foreground px-5 border rounded-md"
-                          }
+                          placeholder="••••••••"
                           value={passwordForm.newPassword}
+                          className="font-medium text-foreground px-3 border rounded-md"
                           onChange={(e) =>
                             setPasswordForm({
                               ...passwordForm,
@@ -743,16 +737,14 @@ export default function SettingsPage() {
                         />
                       </div>
                       <div className="flex justify-between">
-                        {/* <span className="text-muted-foreground ">
-                          Confirm New Password
-                        </span> */}
+                        <span className="text-muted-foreground">
+                          Confirm Password
+                        </span>
                         <input
-                          placeholder="Confirm your password"
                           type="password"
-                          className={
-                            "text-center font-medium text-foreground px-5 border rounded-md"
-                          }
+                          placeholder="••••••••"
                           value={passwordForm.confirmNewPassword}
+                          className="font-medium text-foreground px-3 border rounded-md"
                           onChange={(e) =>
                             setPasswordForm({
                               ...passwordForm,
@@ -814,12 +806,11 @@ export default function SettingsPage() {
                   <CardContent className="py-2">
                     <div className="space-y-3 text-sm">
                       <div className="flex justify-between">
+                        <span className="text-muted-foreground">Password</span>
                         <input
-                          placeholder="Enter your password"
+                          placeholder="••••••••"
                           type="password"
-                          className={
-                            "text-center font-medium text-foreground px-5 border rounded-md"
-                          }
+                          className="font-medium text-foreground px-3 border rounded-md"
                           value={deletePassword}
                           onChange={(e) => setDeletePassword(e.target.value)}
                         />
